@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fenn Photobooth</title>
+    <!-- Font elegan -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ========== RESET & DASAR ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Jost', sans-serif;
+            background: #0d0d0d;
+            background-image: 
+                radial-gradient(ellipse at 30% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(180, 140, 70, 0.05) 0%, transparent 50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+            color: #e0d6c2;
+        }
+
+        /* Container utama dengan efek glassmorphism gelap */
+        .container {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 36px;
+            padding: 40px 30px;
+            max-width: 650px;
+            width: 100%;
+            box-shadow: 
+                0 30px 50px rgba(0, 0, 0, 0.7),
+                0 0 0 1px rgba(212, 175, 55, 0.3),
+                inset 0 0 40px rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ornamen garis elegan di pojok */
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 120px;
+            height: 120px;
+            border: 2px solid rgba(212, 175, 55, 0.25);
+            border-radius: 50%;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .container::after {
+            content: "";
+            position: absolute;
+            bottom: -40px;
+            left: -40px;
+            width: 150px;
+            height: 150px;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            border-radius: 50%;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* ========== TIPOGRAFI ========== */
+        h1, h2, h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            color: #d4af37;
+            letter-spacing: 1px;
+        }
+
+        .welcome-title {
+            font-weight: 400;
+            font-size: 1.5rem;
+            color: #b8a88a;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            margin-bottom: 15px;
+        }
+        .welcome-brand {
+            font-size: 3.8rem;
+            font-weight: 700;
+            color: #d4af37;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            line-height: 1.1;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            position: relative;
+            display: inline-block;
+        }
+        .welcome-brand::after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            margin: 15px auto 0;
+        }
+
+        #main-header h1 {
+            font-size: 2.5rem;
+            color: #d4af37;
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+        #main-header h1::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+        }
+
+        /* ========== KAMERA & VIDEO ========== */
+        .video-wrapper {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 2px solid rgba(212, 175, 55, 0.5);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2), 0 10px 20px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+            background: #000;
+        }
+
+        video {
+            display: block;
+            width: 100%;
+            border-radius: 22px;
+            transform: scaleX(-1); /* Mirror ala photobooth */
+        }
+
+        .timer-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 130px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 30px #d4af37, 0 0 60px #b8942e, 0 5px 10px black;
+            display: none;
+            z-index: 20;
+            letter-spacing: 8px;
+            opacity: 0.9;
+        }
+
+        /* ========== TOMBOL ========== */
+        button {
+            font-family: 'Jost', sans-serif;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+            border-radius: 40px;
+            padding: 14px 32px;
+            font-size: 0.9rem;
+            margin: 8px 6px;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37, #b8942e);
+            color: #0d0d0d;
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #e5c158, #c9a632);
+            box-shadow: 0 12px 25px rgba(212, 175, 55, 0.6);
+            transform: translateY(-2px);
+        }
+        .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 5px 10px rgba(212,175,55,0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #8a7a5c;
+            color: #d4af37;
+        }
+        .btn-secondary:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: #d4af37;
+            color: #fff;
+        }
+
+        #snap {
+            background: #d4af37;
+            color: #0d0d0d;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.5), 0 0 0 6px rgba(212,175,55,0.2);
+            margin: 10px auto;
+            display: block;
+            border: 3px solid #fff;
+            transition: 0.15s;
+        }
+        #snap:active {
+            transform: scale(0.92);
+            box-shadow: 0 5px 15px rgba(212,175,55,0.7), 0 0 0 8px rgba(212,175,55,0.3);
+            background: #c9a632;
+        }
+
+        /* ========== SELECT BOX ========== */
+        select {
+            background: #1c1c1c;
+            color: #d4af37;
+            border: 1px solid #8a7a5c;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-family: 'Jost', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23d4af37' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 12px;
+            transition: 0.2s;
+        }
+        select:hover, select:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 10px rgba(212,175,55,0.2);
+        }
+
+        /* ========== GAMBAR PREVIEW & HASIL ========== */
+        .preview-frame, .result-frame {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 24px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            margin: 20px 0;
+            display: inline-block;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .preview-frame img, .result-frame img {
+            width: 100%;
+            border-radius: 16px;
+            border: 3px solid #2a2a2a;
+            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+        }
+
+        /* ========== LOADING ========== */
+        #loading {
+            display: none;
+            padding: 25px;
+            color: #d4af37;
+            font-weight: 500;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin: 20px 0;
+            border: 1px solid rgba(212,175,55,0.3);
+        }
+        .spinner {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(212,175,55,0.3);
+            border-top: 3px solid #d4af37;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ========== ANIMASI FADE IN ========== */
+        .fade-in {
+            animation: elegantFade 0.7s ease forwards;
+        }
+        @keyframes elegantFade {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== STATE AWAL ========== */
+        #main-header, #camera-section, #editor-section, #result-section {
+            display: none;
+        }
+
+        /* Responsif */
+        @media (max-width: 500px) {
+            .container { padding: 25px 15px; }
+            .welcome-brand { font-size: 2.8rem; }
+            #snap { width: 110px; height: 110px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- WELCOME SCREEN -->
+        <div id="welcome-section">
+            <div class="welcome-title">Selamat Datang di</div>
+            <div class="welcome-brand">FENN PHOTOBOOTH</div>
+            <p style="color: #b8a88a; margin-top: 30px; font-style: italic;">Mempersiapkan sesi foto untukmu...</p>
+        </div>
+
+        <!-- HEADER UTAMA (tampil setelah welcome) -->
+        <div id="main-header">
+            <h1>Fenn Photobooth</h1>
+        </div>
+
+        <!-- BAGIAN KAMERA -->
+        <div id="camera-section">
+            <div class="video-wrapper">
+                <video id="video" autoplay playsinline></video>
+                <div id="timerDisplay" class="timer-overlay">3</div>
+            </div>
+            <button id="snap">SNAP</button>
+        </div>
+
+        <!-- BAGIAN EDITOR -->
+        <div id="editor-section">
+            <h3 style="margin-bottom:15px;">Foto Asli</h3>
+            <div class="preview-frame">
+                <img id="raw-preview" src="" alt="Preview Asli">
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border-radius: 20px; padding: 25px; margin-top: 15px; border: 1px solid rgba(212,175,55,0.3);">
+                <label style="color:#d4af37; font-weight:500;">🎞️ Background</label>
+                <select id="bgSelect" style="width:100%; margin: 10px 0 15px;">
+                    <option value="original">Original</option>
+                    <option value="bg1.jpg">Pantai Tropis</option>
+                    <option value="bg2.jpg">Pegunungan</option>
+                    <option value="bg4.jpg">Danau Tenang</option>
+                </select>
+                <label style="color:#d4af37; font-weight:500;">🎨 Filter Artistik</label>
+                <select id="filterSelect" style="width:100%; margin: 10px 0 15px;">
+                    <option value="normal">Normal</option>
+                    <option value="sepia">Vintage Sepia</option>
+                    <option value="bw">Monokrom Klasik</option>
+                    <option value="bright">Cerah Pop</option>
+                    <option value="warm">Kehangatan Emas</option>
+                </select>
+                <button id="processBtn" class="btn-primary" style="width:100%;">✨ Proses dengan AI</button>
+                <button id="retakeBtn1" class="btn-secondary" style="width:100%;">↺ Ulangi Foto</button>
+            </div>
+        </div>
+
+        <!-- LOADING -->
+        <div id="loading">
+            <span class="spinner"></span> Memproses artistik dengan AI & FFmpeg...
+        </div>
+
+        <!-- BAGIAN HASIL AKHIR -->
+        <div id="result-section">
+            <h3 style="margin-bottom:15px;">Hasil Sempurna</h3>
+            <div class="result-frame">
+                <img id="final-img" src="" alt="Hasil Akhir">
+            </div>
+            <div style="margin-top: 20px;">
+                <button id="reeditBtn" class="btn-primary">🎨 Gaya Lain</button>
+                <button id="retakeBtn2" class="btn-secondary">📸 Foto Baru</button>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <!-- ========== JAVASCRIPT (FUNGSI TIDAK BERUBAH) ========== -->
+    <script>
+        // DOM Elements (semua ID sama persis)
+        const welcomeSection = document.getElementById('welcome-section');
+        const mainHeader = document.getElementById('main-header');
+        const cameraSection = document.getElementById('camera-section');
+        const editorSection = document.getElementById('editor-section');
+        const resultSection = document.getElementById('result-section');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const snap = document.getElementById('snap');
+        const rawPreview = document.getElementById('raw-preview');
+        const bgSelect = document.getElementById('bgSelect');
+        const filterSelect = document.getElementById('filterSelect');
+        const processBtn = document.getElementById('processBtn');
+        const finalImg = document.getElementById('final-img');
+        const loading = document.getElementById('loading');
+        const retakeBtn1 = document.getElementById('retakeBtn1');
+        const retakeBtn2 = document.getElementById('retakeBtn2');
+        const reeditBtn = document.getElementById('reeditBtn');
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        // Audio (pastikan file tersedia di server)
+        const audio3 = new Audio('/static/audio/3.mp3');
+        const audio2 = new Audio('/static/audio/2.mp3');
+        const audio1 = new Audio('/static/audio/1.mp3');
+        const audioCekrek = new Audio('/static/audio/cekrek.mp3');
+
+        let capturedBlob = null;
+
+        // Welcome screen 3 detik
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                welcomeSection.style.display = 'none';
+                mainHeader.style.display = 'block';
+                cameraSection.style.display = 'block';
+                mainHeader.classList.add('fade-in');
+                cameraSection.classList.add('fade-in');
+            }, 3000);
+        });
+
+        // Akses kamera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => alert("Kamera tidak ditemukan atau izin ditolak."));
+
+        // Countdown & ambil foto
+        snap.addEventListener('click', () => {
+            snap.disabled = true;
+            let counter = 3;
+            timerDisplay.innerText = counter;
+            timerDisplay.style.display = 'block';
+            audio3.play().catch(e=>{});
+
+            const countdown = setInterval(() => {
+                counter--;
+                if (counter === 2) {
+                    timerDisplay.innerText = counter;
+                    audio2.play().catch(e=>{});
+                } else if (counter === 1) {
+                    timerDisplay.innerText = counter;
+                    audio1.play().catch(e=>{});
+                } else if (counter === 0) {
+                    clearInterval(countdown);
+                    timerDisplay.style.display = 'none';
+                    audioCekrek.play().catch(e=>{});
+                    setTimeout(tampilkanPreviewAsli, 100);
+                }
+            }, 1000);
+        });
+
+        function tampilkanPreviewAsli() {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+
+            canvas.toBlob(blob => {
+                capturedBlob = blob;
+                const rawUrl = URL.createObjectURL(blob);
+                rawPreview.src = rawUrl;
+                
+                cameraSection.classList.remove('fade-in');
+                cameraSection.style.display = 'none';
+                editorSection.style.display = 'block';
+                editorSection.classList.add('fade-in');
+                snap.disabled = false;
+            }, 'image/png');
+        }
+
+        // Proses ke server
+        processBtn.addEventListener('click', () => {
+            if (!capturedBlob) return;
+            editorSection.style.display = 'none';
+            loading.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('image', capturedBlob, 'capture.png');
+            formData.append('filter', filterSelect.value);
+            formData.append('background', bgSelect.value);
+
+            fetch('/process', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                finalImg.src = data.result_url + '?t=' + new Date().getTime();
+                loading.style.display = 'none';
+                resultSection.style.display = 'block';
+                resultSection.classList.add('fade-in');
+            })
+            .catch(err => {
+                console.error(err);
+                loading.style.display = 'none';
+                editorSection.style.display = 'block';
+                alert("Terjadi kesalahan saat memproses gambar.");
+            });
+        });
+
+        // Navigasi
+        reeditBtn.addEventListener('click', () => {
+            resultSection.style.display = 'none';
+            editorSection.style.display = 'block';
+            editorSection.classList.add('fade-in');
+        });
+
+        function resetKamera() {
+            capturedBlob = null;
+            resultSection.style.display = 'none';
+            editorSection.style.display = 'none';
+            cameraSection.style.display = 'block';
+            cameraSection.classList.add('fade-in');
+        }
+        retakeBtn1.addEventListener('click', resetKamera);
+        retakeBtn2.addEventListener('click', resetKamera);
+    </script>
+</body>
+</html>
